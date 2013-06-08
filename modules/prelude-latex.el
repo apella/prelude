@@ -37,11 +37,13 @@
 ;; AUCTeX configuration
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
+(setq reftex-plug-into-AUCTeX t) ;; integrate the two
+(setq bib-cite-use-reftex-view-crossref t)
 
 (setq-default TeX-master nil)
 
 ;; use pdflatex
-(setq TeX-PDF-mode t)
+;; (setq TeX-PDF-mode t)
 
 (setq TeX-view-program-selection
       '((output-dvi "DVI Viewer")
@@ -50,13 +52,19 @@
 
 ;; this section is good for OS X only
 ;; TODO add sensible defaults for Linux/Windows
-(setq TeX-view-program-list
-      '(("DVI Viewer" "open %o")
-        ("PDF Viewer" "open %o")
-        ("HTML Viewer" "open %o")))
+;; (setq TeX-view-program-list
+;;       '(("DVI Viewer" "open %o")
+;;         ("PDF Viewer" "open %o")
+;;         ("HTML Viewer" "open %o")))
 
 (defun prelude-latex-mode-defaults ()
   (turn-on-auto-fill)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex) ; with AUCTex LaTeX mode
+  (add-hook 'latex-mode-hook 'turn-on-reftex) ; with Emacs latex mode
+  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (abbrev-mode +1))
 
 (setq prelude-latex-mode-hook 'prelude-latex-mode-defaults)
