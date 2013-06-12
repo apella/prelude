@@ -9,7 +9,7 @@
 (global-set-key [(f5)] 'recompile)
 
 ;; open a shell at the current path
-(global-set-key "\C-cs" 'shell)
+;;(global-set-key "\C-cs" 'shell)
 
 ;; always use unix line endings
 (setq default-buffer-file-coding-system 'utf-8-unix)
@@ -47,15 +47,23 @@
 (eval-after-load 'google-c-style
   (add-hook 'c-mode-common-hook 'google-set-c-style))
 
-'(eval-after-load 'window-number
-   (window-number-meta-mode 1))
-;; (autoload 'window-number-meta-mode "window-number"
-;;   "A global minor mode that enables use of the M- prefix to select
-;; windows, use `window-number-mode' to display the window numbers in
-;; the mode-line."
-;;   t)
 
-;; toggle it on by default
-;; (window-number-meta-mode 1)
+;; default with window-numbers on
+;; ----------------------------------------------------------------------------
+
+(autoload 'window-number-mode "window-number"
+  "A global minor mode that enables selection of windows according to
+numbers with the C-x C-j prefix.  Another mode,
+`window-number-meta-mode' enables the use of the M- prefix."
+  t)
+
+(autoload 'window-number-meta-mode "window-number"
+  "A global minor mode that enables use of the M- prefix to select
+windows, use `window-number-mode' to display the window numbers in
+the mode-line."
+  t)
+
+(window-number-mode 1)
+(window-number-meta-mode 1)
 
 (provide 'global-settings)
