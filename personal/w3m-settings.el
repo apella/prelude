@@ -21,8 +21,7 @@
   (w3m-browse-url url))
 (setq browse-url-browser-function 'w3m-browse-url-new-tab)
 
-(when 'w3m-alt-keymap
-  (let ((map (make-keymap)))
+(let ((map (make-keymap)))
     (suppress-keymap map)
     (define-key map [backspace] 'w3m-scroll-down-or-previous-url)
     (define-key map [delete] 'w3m-scroll-down-or-previous-url)
@@ -83,7 +82,7 @@
     (define-key map "\C-c\C-c" 'w3m-submit-form)
     (setq dka-w3m-map map))
   ;; set the hook
-  (add-hook 'w3m-mode-hook '(lambda () (use-local-map dka-w3m-map))))
+(add-hook 'w3m-mode-hook '(lambda () (use-local-map dka-w3m-map)))
 
 
 
