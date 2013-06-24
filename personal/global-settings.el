@@ -1,9 +1,16 @@
+;;; global-settings --- settings that I prefer
+
+;;; Commentary:
+
+;;; Code:
 (prelude-ensure-module-deps '(google-c-style
                               window-number
+                              paredit
+                              iy-go-to-char
                               ;; command-frequency
                               ))
 ;; show the linenumbers
-(global-linum-mode 1)
+;; (global-linum-mode 1)
 
 ;; quick key for compilation
 (global-set-key [(f5)] 'recompile)
@@ -12,7 +19,7 @@
 ;;(global-set-key "\C-cs" 'shell)
 
 ;; always use unix line endings
-(setq default-buffer-file-coding-system 'utf-8-unix)
+;; (setq default-buffer-file-coding-system 'utf-8-unix)
 
 ;; replace string
 (global-set-key "\C-c!" 'replace-string)
@@ -23,7 +30,22 @@
 ;; eval last sexp and print the result
 (global-set-key (kbd "C-c C-j") 'eval-print-last-sexp)
 
-  ;; source: emacs redux
+;; move point to next occurance of char.
+;; Can start typing immediately.
+(global-set-key "\M-m" 'iy-go-to-char)
+(global-set-key "\M-M" 'iy-go-to-char-backward)
+
+;; auto-indent new lines
+(define-key global-map (kbd "RET") 'newline-and-indent)
+
+;; display the time down below
+(setq display-time-24hr-format t)
+(display-time-mode)
+
+
+
+
+;; source: emacs redux
 ;; http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
 (defun rename-file-and-buffer ()
   "Rename the current buffer and file it is visiting."
