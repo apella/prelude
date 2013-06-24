@@ -1,0 +1,606 @@
+1;; start in my own dir
+(cd (getenv "HOME"))
+(prefer-coding-system 'utf-8)
+;; allow quick include/exlude of setup parts
+(defvar general-keys t) ; extra keybindings
+;(defvar cygwin-stuff t)
+(defvar enable-window-number-mode t)
+(defvar enable-menu-bar t)
+(defvar enable-dim-google t)
+(defvar display-time t)
+;(defvar load-nero-browser t)
+(defvar global-rainbow-delim t)
+(defvar global-autocomp t)
+(defvar auto-scroll-compile t)
+(defvar load-w3m-settings t)
+(defvar paredit-settings t)
+(defvar latex-stuff t)
+(defvar reftex-startup t)
+(defvar auctex-startup t)
+;(defvar use-perspective t)
+(defvar force-tags t)
+(defvar extra-c++-filetypes t)
+(defvar ac-init t)
+(defvar company-settings t)
+;(defvar extra-semantic-include-paths t)
+;(defvar cedet-stuff t)
+;(defvar start-muse t)
+(defvar w3m-alt-keymap t)
+
+
+;; attempt to load a feature/library, failing silently
+(defun try-require (feature)
+  "Attempt to load a library or module. "
+  (require feature nil t))
+
+;; load-path enhancement
+(defun fni/add-to-load-path (this-directory &optional with-subdirs recursive)
+  "Add THIS-DIRECTORY at the beginning of the load-path, if it exists.
+Add all its subdirectories not starting with a '.' if the
+optional argument WITH-SUBDIRS is not nil.
+Do it recursively if the third argument is not nil."
+  (when (and this-directory
+             (file-directory-p this-directory))
+    (let* ((this-directory (expand-file-name this-directory))
+           (files (directory-files this-directory t "^[^\\.]")))
+
+      ;; completely canonicalize the directory name (*may not* begin with `~')
+      (while (not (string= this-directory (expand-file-name this-directory)))
+        (setq this-directory (expand-file-name this-directory)))
+
+      (message "Adding `%s' to load-path..." this-directory)
+      (add-to-list 'load-path this-directory)
+
+      (when with-subdirs
+        (while files
+          (setq dir-or-file (car files))
+          (when (file-directory-p dir-or-file)
+            (if recursive
+                (fni/add-to-load-path dir-or-file 'with-subdirs 'recursive)
+              (fni/add-to-load-path dir-or-file)))
+          (setq files (cdr files)))))))
+
+;; Use `M-x list-load-path-shadows RET' to display a list of external Emacs
+;; Lisp files that shadow Emacs builtins (listing potential load path
+;; problems).
+(fni/add-to-load-path "~/.emacs.d/BartSpiers" t t)
+
+
+;; packages sources
+(when  (try-require 'package)
+  (add-to-list 'package-archives
+               '("marmalade" . "http://marmalade-repo.org/packages/"))
+  (add-to-list 'package-archives
+               '("melpa" . "http://melpa.milkbox.net/packages/") t)
+  (package-initialize)
+
+  (defvar my-packages '(ac-nrepl auctex auto-complete auto-complete-clang
+                                 c-eldoc cl-lib cljdoc clojure-mode
+                                 clojure-project-mode cmake-mode cmake-project
+                                 color-theme command-frequency ctags ctags-update
+                                 ctypes durendal eieio el-autoyas elein ghc
+                                 ghci-completion google-c-style haskell-mode
+                                 idle-highlight-mode ido-ubiquitous iy-go-to-char
+                                 json-mode kv latex-pretty-symbols levenshtein magit
+                                 melpa member-function nlinum nrepl org paredit
+                                 paredit-menu persp-mode popup project-mode rainbow-delimiters
+                                 rainbow-mode slime slime-repl smex ssh starter-kit w3m
+                                 window-number yasnippet))
+
+  (when (not package-archive-contents)
+    package-refresh-contents)
+  (dolist (p my-packages)
+    (when (not (package-installed-p p))
+      (package-install p))))
+
+(when 'general-keys
+  ;; show the linenumbers
+  (global-linum-mode 1)
+
+  ;; quick key for compilation
+  (global-set-key [(f5)] 'recompile)
+
+  ;; open a shell at the current path
+  (global-set-key "\C-cs" 'shell)
+
+  ;; always use unix line endings
+  (setq default-buffer-file-coding-system 'utf-8-unix)
+
+  ;; replace string
+  (global-set-key "\C-c!" 'replace-string)
+
+  ;; winner mode: allows you to undo changes to the window configuration
+  ;; with C-c left and C-c right
+  ;;(winner-mode 1)
+
+  ;; map goto-line to M-g
+  (global-set-key "\M-g" 'goto-line)
+
+  ;; move point to next occurrence of char. Can start typing
+  ;; immediately.
+  (when (try-require 'iy-go-to-char)
+    (global-set-key "\M-m" 'iy-go-to-char)
+    (global-set-key "\M-M" 'iy-go-to-char-backward))
+
+  ;; open magit-status
+  ;(global-set-key (kbd "C-g") 'magit-status)
+
+  ;; eval last sexp and print the result
+  (global-set-key (kbd "C-c C-j") 'eval-print-last-sexp)
+
+  ;; map eval-region as we use it so much
+  (global-set-key "\C-ce" 'eval-region)
+  (global-set-key "\C-c\C-e" 'eval-buffer)
+  ;; relace yes by y
+  (fset 'yes-or-no-p 'y-or-n-p)
+  ;; ask confirmation before leaving examcs
+  (setq confirm-kill-emacs 'y-or-n-p)
+
+  ;; auto indent newlines
+  (define-key global-map (kbd "RET") 'newline-and-indent)
+
+  ;; kill line backward (kill from the cursor to the beginning of the
+  ;; line)
+  (global-set-key (kbd "C-<backspace>") (lambda ()
+                                          (interactive)
+                                          (kill-line 0)
+                                          (indent-according-to-mode)))
+  ;; Join this line to previous and fix up whitespace at join.
+  ;; If there is a fill prefix, delete it from the beginning of this
+  ;; line. With argument, join this line to following line.
+  (global-set-key (kbd "M-j")
+                  (lambda ()
+                    (interactive)
+                    (join-line -1)))
+  ;; use the zenburn theme
+  (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+;  (load-theme 'zenburn t)
+
+  ;; useful display of the bracket you're closing.
+  (show-paren-mode)
+
+  ;; set the default indentation level to 2 spaces
+  (setq-default c-basic-offset 2)
+
+
+  ;; source: emacs redux
+  ;; http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
+  (defun rename-file-and-buffer ()
+    "Rename the current buffer and file it is visiting."
+    (interactive)
+    (let ((filename (buffer-file-name)))
+      (if (not (and filename (file-exists-p filename)))
+          (message "Buffer is not visiting a file!")
+        (let ((new-name (read-file-name "New name: " filename)))
+          (cond
+           ((vc-backend filename) (vc-rename-file filename new-name))
+           (t
+            (rename-file filename new-name t)
+            (set-visited-file-name new-name t t))
+           )))))
+
+  (global-set-key (kbd "C-c r") 'rename-file-and-buffer)
+)
+
+;; delete the selection
+(delete-selection-mode 1)
+
+;; google c-style
+(when (try-require 'google-c-style)
+  (add-hook 'c-mode-common-hook 'google-set-c-style))
+
+;; track the frequency of the commands I use
+;; (when  (try-require 'command-frequency)
+;;   (command-frequency-table-load)
+;;   (command-frequency-mode 1)
+;;   (command-frequency-autosave-mode 1))
+
+(when 'cygwin-stuff
+  ;; add cygwin's /bin to the exec-path
+  (if (file-directory-p "d:/cygwin/bin")
+      (add-to-list 'exec-path "d:/cygwin/bin"))
+
+  ;; add git's bin to the exec-path
+
+  ;; (if (file-directory-p "C:/Program Files (x86)/Git/bin")
+  ;;     (add-to-list 'exec-path "C:/Program Files (x86)/Git/bin"))
+
+
+
+  ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Initial setup
+  ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; This assumes that Cygwin is installed in C:\cygwin (the
+  ;; default) and that C:\cygwin\bin is not already in your
+  ;; Windows Path (it generally should not be).
+
+  (setq exec-path (cons "D:/cygwin/bin" exec-path))
+  (setenv "PATH" (concat "C:/Program Files (x86)/Rampant Logic Postscript Viewer;" "D:/cygwin/bin;" (getenv "PATH")))
+
+  ;;   LOGNAME and USER are expected in many Emacs packages
+  ;;   Check these environment variables.
+
+  (if (and (null (getenv "USER"))
+           ;; Windows includes variable USERNAME, which is copied to
+           ;; LOGNAME and USER respectively.
+           (getenv "USERNAME"))
+      (setenv "USER" (getenv "USERNAME")))
+
+  (if (and (getenv "LOGNAME")
+           ;;  Bash shell defines only LOGNAME
+           (null (getenv "USER")))
+      (setenv "USER" (getenv "LOGNAME")))
+
+  (if (and (getenv "USER")
+           (null (getenv "LOGNAME")))
+      (setenv "LOGNAME" (getenv "USER")))
+
+  ;; Would call Windows command interpreter. Change it.
+
+  (setq shell-file-name "bash")
+  (setenv "SHELL" shell-file-name)
+                                        ;(setq explicit-shell-file-name shell-file-name)
+  ;(setq explicit-shell-file-name "D:\\cygwin\\bin\\bash.exe")
+  (setq explicit-shell-file-name "bash.exe")
+  (setq explicit-bash-args '("--login -i"))
+
+  ;; (setq shell-file-name "GitHub")
+  ;; (setq explicit-shell-file-name "C:/Users/bart/AppData/Local/GitHub/GitHub.appref-ms")
+  ;; (setq explicit-GitHub.appref-ms-args '("-open-shell"))
+  ;; (setenv "SHELL" shell-file-name)
+  ;; Remove C-m (^M) characters that appear in output
+
+  (add-hook 'comint-output-filter-functions
+            'comint-strip-ctrl-m)
+
+
+                                        ;(add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
+                                        ;(setq explicit-shell-file-name (concat shell-file-name " -"))
+  (cond ((eq window-system 'w32)
+         (setq tramp-default-method "scpx"))
+        (t
+         (setq tramp-default-method "scpc"))))
+
+;; printing on windows
+(when (and (string= (window-system) "w32") (file-exists-p "c:/Program Files/gsview/gsprint.exe"))
+  (progn
+    ;; Windows printer
+    (setq-default ps-lpr-command (expand-file-name "c:/Program Files/gsview/gsprint.exe"))
+    (setq-default ps-printer-name t)
+    (setq-default ps-printer-name-option nil)
+    (setq ps-lpr-switches '("-query")) ; show-printer-dialog
+    (setq ps-right-header '("/pagenumberstring load" ps-time-stamp-dd-mm-yyyy))))
+
+(if (eq window-system 'x)
+    (setq ps-lpr-command "gtklp"))
+
+(when 'enable-dim-google
+  ;; Ask google about current region, select word-at point if no region
+  ;; is selected
+  ;;
+  ;; C-c g
+  (try-require 'dim-google)
+  )
+
+(when 'enable-menu-bar
+  ;; put the menu bar back on (disabled by default by the
+  ;; starter-package
+  (menu-bar-mode))
+
+(when enable-window-number-mode
+  ;; give windows a number for easy switching
+  (autoload 'window-number-mode "window-number"
+    "A global minor mode that enables selection of windows according to
+numbers with the C-x C-j prefix.  Another mode,
+`window-number-meta-mode' enables the use of the M- prefix."
+    t)
+
+  (autoload 'window-number-meta-mode "window-number"
+    "A global minor mode that enables use of the M- prefix to select
+windows, use `window-number-mode' to display the window numbers in
+the mode-line."
+    t)
+
+  ;; toggle it on by default
+  (window-number-mode )
+  (window-number-meta-mode 1))
+
+(when 'display-time
+  (setq display-time-24hr-format t)
+  (display-time-mode))
+
+;; try loading the cuda mode
+(when 'define-cuda-mode
+  (try-require 'cuda-mode))
+
+(when 'load-nero-browser
+  (try-require 'nero))
+
+;; colour all the delimiters in colours
+(when 'global-rainbow-delim
+  (global-rainbow-delimiters-mode))
+
+;; always use autocomplete mode
+(when (and 'global-autocomp
+           (require 'auto-complete))
+  (global-auto-complete-mode))
+
+;; automatically let the compilation window scroll as it does it work
+(when 'auto-scroll-compile
+  (setq compilation-scroll-output 1))
+
+(when 'load-w3m-settings
+  ;; allow the use of cookies
+  (setq w3m-use-cookies t)
+  ;; commented out as we define it below so that we open such calls in
+  ;; new tabs
+  ;(setq browse-url-browser-function 'w3m-browse-url)
+  (autoload 'w3m-browse-url "w3m" "Ask a WWW browser to show a URL." t)
+  ;; optional keyboard short-cut
+  (global-set-key "\C-xm" 'browse-url-at-point)
+
+  ;; allow browse-url to open URL's in a new tab instead of the
+  ;; current one
+  (defun w3m-new-tab ()
+    (interactive)
+    (w3m-copy-buffer nil nil nil t))
+  (defun w3m-browse-url-new-tab (url &optional new-session)
+    (interactive)
+    (w3m-new-tab)
+    (w3m-browse-url url))
+  (setq browse-url-browser-function 'w3m-browse-url-new-tab)
+
+  (when 'w3m-alt-keymap
+    (let ((map (make-keymap)))
+      (suppress-keymap map)
+      (define-key map [backspace] 'w3m-scroll-down-or-previous-url)
+      (define-key map [delete] 'w3m-scroll-down-or-previous-url)
+      (define-key map "\C-?" 'w3m-scroll-down-or-previous-url)
+      (define-key map "\t" 'w3m-next-anchor)
+      (define-key map [(shift tab)] 'w3m-previous-anchor)
+      (define-key map [(shift iso-left-tab)] 'w3m-previous-anchor)
+      (define-key map "\C-m" 'w3m-view-this-url)
+      (define-key map [(shift return)] 'w3m-view-this-url-new-session)
+      (define-key map [(shift kp-enter)] 'w3m-view-this-url-new-session)
+      (define-key map [(button2)] 'w3m-mouse-view-this-url)
+      (define-key map [(shift button2)] 'w3m-mouse-view-this-url-new-session)
+      (define-key map " " 'scroll-up)
+      (define-key map "a" 'w3m-bookmark-add-current-url)
+      (define-key map "\M-a" 'w3m-bookmark-add-this-url)
+      (define-key map "+" 'w3m-antenna-add-current-url)
+      (define-key map "A" 'w3m-antenna)
+      (define-key map "c" 'w3m-print-this-url)
+      (define-key map "C" 'w3m-print-current-url)
+      (define-key map "d" 'w3m-download)
+      (define-key map "D" 'w3m-download-this-url)
+      ;; (define-key map "D" 'w3m-download-with-wget)
+      ;; (define-key map "D" 'w3m-download-with-curl)
+      (define-key map "g" 'w3m-goto-url)
+      (define-key map "G" 'w3m-goto-url-new-session)
+      (define-key map "h" 'describe-mode)
+      (define-key map "H" 'w3m-gohome)
+      (define-key map "I" 'w3m-toggle-inline-images)
+      (define-key map "\M-i" 'w3m-save-image)
+      (define-key map "M" 'w3m-view-url-with-external-browser)
+      (define-key map "n" 'w3m-view-next-page)
+      (define-key map "N" 'w3m-namazu)
+      (define-key map "o" 'w3m-history)
+      (define-key map "O" 'w3m-db-history)
+      (define-key map "p" 'w3m-view-previous-page)
+      (define-key map "q" 'w3m-close-window)
+      (define-key map "Q" 'w3m-quit)
+      (define-key map "R" 'w3m-reload-this-page)
+      (define-key map "s" 'w3m-search)
+      (define-key map "S" (lambda ()
+                            (interactive)
+                            (let ((current-prefix-arg t))
+                              (call-interactively 'w3m-search))))
+      (define-key map "u" 'w3m-view-parent-page)
+      (define-key map "v" 'w3m-bookmark-view)
+      (define-key map "W" 'w3m-weather)
+      (define-key map "=" 'w3m-view-header)
+      (define-key map "\\" 'w3m-view-source)
+      (define-key map "?" 'describe-mode)
+      (define-key map ">" 'scroll-left)
+      (define-key map "<" 'scroll-right)
+      (define-key map "." 'beginning-of-buffer)
+      (define-key map "^" 'w3m-view-parent-page)
+      (define-key map "]" 'w3m-next-form)
+      (define-key map "[" 'w3m-previous-form)
+      (define-key map "}" 'w3m-next-image)
+      (define-key map "{" 'w3m-previous-image)
+      (define-key map "\C-c\C-c" 'w3m-submit-form)
+      (setq dka-w3m-map map))
+    ;; set the hook
+    (add-hook 'w3m-mode-hook '(lambda () (use-local-map dka-w3m-map))))
+
+  )
+(when 'paredit-settings
+  (autoload 'paredit-mode "paredit"
+    "Minor mode for pseudo-structurally editing Lisp code." t)
+  (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
+  (add-hook 'lisp-mode-hook (lambda () (paredit-mode +1)))
+  (add-hook 'lisp-interaction-mode-hook (lambda () (paredit-mode +1)))
+  (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
+  (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
+
+
+  (when (require 'eldoc)
+    (eldoc-add-command
+     'paredit-backward-delete
+     'paredit-close-round)
+    )
+  )
+
+(when (require 'haskell-mode)
+  ;; set the indentation
+  (custom-set-variables
+   '(haskell-mode-hook '(turn-on-haskell-indentation))))
+
+(when 'latex-stuff
+
+  (require 'tex-mik)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex) ; with AUCTex LaTeX mode
+  (add-hook 'latex-mode-hook 'turn-on-reftex) ; with Emacs latex mode
+  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+
+
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+  (setq reftex-plug-into-AUCTeX t) ;; integreate the two
+  (setq bib-cite-use-reftex-view-crossref t)
+  ;(try-require 'ebib)              ; for managing our bibliography
+  ;; (add-hook 'LaTeX-mode-hook (lambda ()
+  ;;                              (when (require 'ebib)
+  ;;                                (local-set-key "\C-cb" 'ebib-insert-bibtex-key))))
+  )
+
+(when 'use-perspective
+  ;; old perpective mode, doesn't provide save/load of perspectives
+  ;(require 'perspective)
+  ;; better one
+  ;(require 'persp-mode)
+  ;; toggle the perspective mode
+  ;(persp-mode)
+  ;; Keys:
+
+  ;; C-x x s -- create/switch to perspective.
+  ;; C-x x r -- rename perspective.
+  ;; C-x x c -- kill perspective
+  ;; (if you try to kill 'none' persp -- it'l kill all opened buffers).
+  ;; C-x x a -- add buffer to perspective.
+  ;; C-x x i -- import all buffers from another perspective.
+  ;; C-x x k -- remove buffer from perspective.
+  ;; C-x x w -- save perspectives to file.
+  ;; C-x x l -- load perspectives from file.
+
+  ;; Customization:
+  ;; M-x: customize-group RET persp-mode RET
+  )
+
+(when 'extra-c++-filetypes
+  (setq auto-mode-alist (cons '("\\.h$" . c++-mode) auto-mode-alist))
+  (setq auto-mode-alist (cons '("\\.cu$" . c++-mode) auto-mode-alist))
+  (setq auto-mode-alist (cons '("\\.cc$" . c++-mode) auto-mode-alist))
+  (setq auto-mode-alist (cons '("\\.hpp$" . c++-mode) auto-mode-alist))
+  (setq auto-mode-alist (cons '("\\.ocl$" . c++-mode) auto-mode-alist))
+  (setq auto-mode-alist (cons '("\\.cl$" . c++-mode) auto-mode-alist))
+  )
+(when 'company-settings
+  ;; (global-company-mode)
+  ;; let's not use global setting
+  ;; (global-set-key (kbd "M-/") 'company-complete)
+  (defun my-c-company-hook ()
+    (company-mode)
+    (local-set-key (kbd "M-/") 'company-complete))
+  (add-hook 'c-mode-common-hook 'my-c-company-hook)
+  )
+
+(when 'cedet-stuff
+  ;(load-file "~/cedet-1.1/common/cedet.el")
+  ;(global-ede-mode 1)                ; enable the project management system
+  ;(semanntic-load-enable-code-helpers); enable prototype help and smart
+                                        ; completion
+  ;(global-srecode-monor-mode 1) ; enable template insertion menu
+  (try-require 'semantic)
+  ;(try-require 'semantic/ia)
+  ;; activate semantic
+  ;(semantic-mode 1)
+  ;(global-semantic-idle-summary-mode)
+
+  (semantic-add-system-include "C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.0/common/inc" 'c++-mode)
+  (semantic-add-system-include "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.0/include" 'c++-mode)
+  (semantic-add-system-include "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include" 'c++-mode)
+  ;(semantic-add-system-include "D:/BartSpiers/libs/myUtils" 'c++-mode)
+  (semantic-add-system-include "D:/Boost_1_51_0" 'c++-mode)
+
+  ;; add to imenu
+  (defun my-semantic-hook ()
+    (imenu-add-to-menubar "TAGS"))
+  (add-hook 'semantic-init-hooks 'my-semantic-hook)
+
+  ;; if you want to enable support for gnu global
+  ;; (when (cedet-gnu-global-version-check t)
+  ;;   (semanticdb-enable-gnu-global-databases 'c-mode)
+  ;;   (semanticdb-enable-gnu-global-databases 'c++-mode))
+  ;; enable ctags for some languages:
+  ;;  Unix Shell, Perl, Pascal, Tcl, Fortran, Asm
+  ;; (when (cedet-ectag-version-check)
+  ;;   (semantic-load-enable-primary-exuberent-ctags-support))
+  (defun my-cedet-hook ()
+    (local-set-key [(control return)] 'semantic-ia-complete-symbol)
+    (local-set-key "\C-c?" 'semantic-ia-complete-symbol-menu)
+    (local-set-key "\C-c>" 'semantic-complete-analyze-inline)
+    (local-set-key "\C-cp" 'semantic-analyze-proto-impl-toggle)
+    (local-set-key ">" 'semantic-complete-self-insert)
+    (local-set-key "." 'semantic-complete-self-insert)
+    (add-to-list 'ac-sources 'ac-source-semantic))
+  (add-hook 'c-mode-common-hook 'my-cedet-hook))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (when 'extra-semantic-include-paths                                                               ;;
+;;   (semantic-add-system-include "C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.0/common/inc")  ;;
+;;   )                                                                                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(when 'start-muse
+  (try-require 'muse) ; load generic module
+  (try-require 'muse-mode) ; load authoring mode
+  (try-require 'muse-colors) ; load coloring/font-lock module
+  (try-require 'muse-html) ; load publishing styles
+  (try-require 'muse-latex)
+  (try-require 'muse-latex2png) ; publish <latex> tags
+  )
+
+(when 'use-bongo
+  (add-to-list 'load-path "~/bongo")
+  (autoload 'bongo "bongo"
+    "Start Bongo by switching to a Bongo buffer." t))
+
+(global-ws-trim-mode)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(bongo-enabled-backends (quote (vlc)))
+ '(company-backends (quote (company-elisp company-nxml company-css company-semantic company-eclim company-xcode company-ropemacs (company-gtags company-etags company-dabbrev-code company-keywords) company-oddmuse company-files company-dabbrev)))
+ '(custom-safe-themes (quote ("c08e5eb38fa51e6c48e61a70fb5f872624524060e7313b339d2b5a5060b04137" "e815d25ae1795b28b92d93dc738c0c17a060ef4984cb2c0de97a0aea8406fe17" "c875825640d14929db129ab90f2b4a5f661bd7eddc51d9bd95249ae41732d877" "8a308e0dc8ff818ec59db202596704d51637ff2425cf2e3143eee8380d355f00" "4121bfa0ba3c62781f9e7bcf64560cb115c64aa64d336e3a7dc7cf954a7cf1bf" "64b7be5703b90e05f7bc1f63a9f689a7c931626462697bea9476b397da194bd9" "b1c293eaaf68109663c683debb6574d095ba23260aa2f9d897fb1cbb7b0571d2" default)))
+ '(ecb-auto-activate t)
+ '(ecb-options-version "2.40")
+ '(ecb-source-path (quote (("d:/BartSpiers/" "home") ("C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include" "") "C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.0/common/inc" "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.0/include" "d:/BartSpiers/libs/myUtils" "D:/Boost_1_51_0/boost/")))
+ '(ede-project-directories (quote ("d:/BartSpiers/MemoryAccessMapper")))
+ '(fill-column 80)
+ '(global-rainbow-delimiters-mode t)
+ '(gnuplot-program "\"/cygdrive/c/Program Files (x86)/gnuplot/bin/gnuplot.exe\"")
+ '(haskell-hoogle-command "hoogle")
+ '(haskell-mode-hook (quote (turn-on-haskell-indentation)))
+ '(haskell-package-manager-name "cabal")
+ '(haskell-process-check-cabal-config-on-load nil)
+ '(haskell-process-suggest-remove-import-lines t)
+ '(haskell-tags-on-save t)
+ '(reftex-ref-style-alist (quote (("Default" t (("\\ref" 13) ("\\pageref" 112))) ("Varioref" "varioref" (("\\vref" 118) ("\\vpageref" 103) ("\\Vref" 86) ("\\Ref" 82))) ("Fancyref" "fancyref" (("\\fref" 102) ("\\Fref" 70))) ("Hyperref" "hyperref" (("\\autoref" 97) ("\\autopageref" 117))) ("Cleveref" "cleveref" (("\\cref" 99) ("\\Cref" 67))))))
+ '(reftex-ref-style-default-list (quote ("Default" "Cleveref")))
+ '(safe-local-variable-values (quote ((emacs-lisp-docstring-fill-column . t) (eval when (fboundp (quote rainbow-mode)) (rainbow-mode 1)) (whitespace-line-column . 80) (lexical-binding . t))))
+ '(semantic-c-dependency-system-include-path (quote ("/lib/gcc/i686-pc-cygwin/4.5.3/include/c++/" "/cygdrive/C/Program Files/NVIDIA GPU Computing toolkit/CUDA/v5.0/include/" "/cygdrive/c/ProgramData/NVIDIA Corporation/CUDA Samples/v5.0/common/inc/")))
+ '(tags-table-list (quote ("d:/BartSpiers/MemoryAccessMapper/TAGS" "~/tags/cuda/TAGS")))
+ '(w3m-coding-system (quote utf-8))
+ '(yas-global-mode t nil (yasnippet))
+ '(yas-snippet-dirs (quote ("~/.emacs.d/snippets" "/cygdrive/d/BartSpiers/.emacs.d/elpa/yasnippet-20130218.2229/snippets" "~/.emacs.d/mysnippets")) nil (yasnippet)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ediff-even-diff-A ((((class color) (background dark)) (:background "dark green"))))
+ '(ediff-even-diff-B ((((class color) (background dark)) (:background "dark red"))))
+ '(ediff-odd-diff-A ((((class color) (background dark)) (:background "dark green"))))
+ '(ediff-odd-diff-B ((((class color) (background dark)) (:background "dark red"))))
+ '(mumamo-background-chunk-major ((((class color) (background dark)) (:background "black"))) t)
+ '(mumamo-background-chunk-submode1 ((((class color) (background dark)) (:background "black"))) t))
