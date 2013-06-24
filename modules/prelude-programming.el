@@ -130,5 +130,8 @@
     (global-flycheck-mode +1)
   (add-hook 'prog-mode-hook 'flycheck-mode))
 
+;; automatically let the compilation window scroll as it does it work
+(setq compilation-scroll-output 1)
+
 (provide 'prelude-programming)
 ;;; prelude-programming.el ends here
