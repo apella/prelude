@@ -64,9 +64,6 @@
 (global-set-key (kbd "C-c r") 'rename-file-and-buffer)
 
 
-;; google c-style
-(eval-after-load 'google-c-style
-  (add-hook 'c-mode-common-hook 'google-set-c-style))
 
 
 ;; default with window-numbers on
@@ -86,5 +83,8 @@ the mode-line."
 
 (window-number-mode 1)
 (window-number-meta-mode 1)
+
+;; Start the server so we can just connect to this
+(server-start)
 
 (provide 'global-settings)
