@@ -48,7 +48,7 @@
   :type 'boolean
   :group 'prelude)
 
-(defcustom prelude-whitespace t
+(defcustom prelude-whitespace nil
   "Non-nil values enable Prelude's whitespace visualization."
   :type 'boolean
   :group 'prelude)
@@ -61,6 +61,11 @@ Will only occur if prelude-whitespace is also enabled."
 
 (defcustom prelude-flyspell nil
   "Non-nil values enable Prelude's flyspell support."
+  :type 'boolean
+  :group 'prelude)
+
+(defcustom prelude-auto-fill t
+  "Turn on `auto-fill-mode' by default in text files."
   :type 'boolean
   :group 'prelude)
 
@@ -251,8 +256,17 @@ Will only occur if prelude-whitespace is also enabled."
     (add-hook 'before-save-hook 'prelude-cleanup-maybe nil t)
     (whitespace-mode +1)))
 
+(defun prelude-enable-auto-fill ()
+  "Enable `auto-fill-mode' if `prelude-auto-fill' is not nill."
+  (when prelude-auto-fill
+    ;; Set the fill column to 80 instead of 70
+    (setq fill-column 80)
+    ;; And activate the mode
+    (auto-fill-mode +1)))
+
 (add-hook 'text-mode-hook 'prelude-enable-flyspell)
 (add-hook 'text-mode-hook 'prelude-enable-whitespace)
+(add-hook 'text-mode-hook 'prelude-enable-auto-fill)
 
 ;; enable narrowing commands
 (put 'narrow-to-region 'disabled nil)
