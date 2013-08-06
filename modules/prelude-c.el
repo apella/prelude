@@ -51,7 +51,7 @@
 (setq prelude-makefile-mode-hook 'prelude-makefile-mode-defaults)
 
 ;; add boost to the system include
-(semantic-add-system-include "~/boost_1_51_0/boost" 'c++-mode)
+;; (semantic-add-system-include "~/boost_1_51_0/boost" 'c++-mode)
 
 (add-hook 'makefile-mode-hook (lambda ()
                                 (run-hooks 'prelude-makefile-mode-hook)))
