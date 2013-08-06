@@ -8,6 +8,6 @@
   (add-hook 'c-mode-common-hook 'google-set-c-style))
 
 ;; support cedet
-(load-file "~/emacs/cedet-bzr/cedet-devel-load.el")
+;;(load-file "~/emacs/cedet-bzr/cedet-devel-load.el")
 
 (provide 'programming)
