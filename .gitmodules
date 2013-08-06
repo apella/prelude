@@ -1,3 +1,6 @@
 [submodule "yasnippet-snippets"]
 	path = yasnippet-snippets
 	url = git://github.com/AndreaCrotti/yasnippet-snippets.git
+[submodule "personal/minimal-cedet-conf"]
+	path = personal/minimal-cedet-conf
+	url = git://gist.github.com/3930120.git

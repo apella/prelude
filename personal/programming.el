@@ -1,5 +1,13 @@
-
 (add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.hpp$" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.ocl$" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cu$" . c++-mode))
+
+;; google c-style
+(eval-after-load 'google-c-style
+  (add-hook 'c-mode-common-hook 'google-set-c-style))
+
+;; support cedet
+;;(load-file "~/emacs/cedet-bzr/cedet-devel-load.el")
+
+(provide 'programming)

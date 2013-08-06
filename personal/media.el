@@ -8,7 +8,8 @@
 (global-set-key (kbd "<f2>") 'emms-smart-browse)
 (setq emms-source-file-default-directory "~/Dropbox/Music/")
 
-;; when you have compiled emms-print-metadata we can use that to gather the metadata for in the library
+;; when you have compiled emms-print-metadata we can use that to gather the
+;; metadata for in the library
 (require 'emms-info-libtag)
 (setq emms-info-functions '(emms-info-libtag))
 
