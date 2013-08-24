@@ -110,6 +110,7 @@ Will only occur if prelude-whitespace is also enabled."
 (require 'smartparens-config)
 (setq sp-base-key-bindings 'paredit)
 (setq sp-autoskip-closing-pair 'always)
+(sp-use-paredit-bindings)
 (smartparens-global-mode +1)
 
 ;; diminish keeps the modeline tidy
