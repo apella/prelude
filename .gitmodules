@@ -4,3 +4,6 @@
 [submodule "personal/minimal-cedet-conf"]
 	path = personal/minimal-cedet-conf
 	url = git://gist.github.com/3930120.git
+[submodule "emms"]
+	path = emms
+	url = http://git.sv.gnu.org/r/emms.git
