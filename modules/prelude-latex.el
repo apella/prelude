@@ -43,7 +43,7 @@
 (setq-default TeX-master nil)
 
 ;; use pdflatex
-;; (setq TeX-PDF-mode t)
+(setq TeX-PDF-mode t)
 
 (setq TeX-view-program-selection
       '((output-dvi "DVI Viewer")
