@@ -115,15 +115,15 @@
 (global-set-key (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
 
 ;; key chords
-;; (require 'key-chord)
+(require 'key-chord)
 
-;; (key-chord-define-global "jj" 'ace-jump-word-mode)
-;; (key-chord-define-global "jl" 'ace-jump-line-mode)
-;; (key-chord-define-global "jk" 'ace-jump-char-mode)
-;; (key-chord-define-global "JJ" 'prelude-switch-to-previous-buffer)
-;; (key-chord-define-global "uu" 'undo-tree-visualize)
+(key-chord-define-global "jj" 'ace-jump-word-mode)
+(key-chord-define-global "jl" 'ace-jump-line-mode)
+(key-chord-define-global "jk" 'ace-jump-char-mode)
+(key-chord-define-global "JJ" 'prelude-switch-to-previous-buffer)
+(key-chord-define-global "uu" 'undo-tree-visualize)
 
-;; (key-chord-mode +1)
+(key-chord-mode +1)
 
 (provide 'prelude-global-keybindings)
 

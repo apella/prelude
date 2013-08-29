@@ -42,8 +42,29 @@
 (setq display-time-24hr-format t)
 (display-time-mode)
 
+;; disable prelude-whitespace by default
+(setq prelude-whitespace nil)
 
+;; disable flyspell usage by default
+(setq prelude-flyspell nil)
 
+;; use auto-fill by default
+(defcustom prelude-auto-fill t
+  "Turn on `auto-fill-mode' by default in text files."
+  :type 'boolean
+  :group 'prelude)
+
+(defun prelude-enable-auto-fill ()
+  "Enable `auto-fill-mode' if `prelude-auto-fill' is not nil."
+  (when prelude-auto-fill
+    ;; Set the fill column to 80 instead of 70
+    (setq fill-column 80)
+    (auto-fill-mode +1)))
+
+(add-hook 'text-mode-hook 'prelude-enable-auto-fill)
+
+;; disable key-chord mode
+(key-chord-mode -1)
 
 ;; source: emacs redux
 ;; http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
