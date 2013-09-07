@@ -71,8 +71,16 @@
 (setq display-time-24hr-format t)
 (display-time-mode)
 
+;; Change the search functions to ones that use regular expressions
+(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+(global-set-key (kbd "C-r") 'isearch-backward-regexp)
+(global-set-key (kbd "C-M-s") 'isearch-forward)
+(global-set-key (kbd "C-M-r") 'isearch-backward)
 
-
+(setq x-select-enable-clipboard t
+      x-select-enable-primary t
+      save-interprogram-past-before-kill t
+      )
 
 ;; source: emacs redux
 ;; http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
