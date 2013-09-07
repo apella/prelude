@@ -82,6 +82,30 @@
       save-interprogram-past-before-kill t
       )
 
+;; disable prelude-whitespace by default
+(setq prelude-whitespace nil)
+
+;; disable flyspell usage by default
+(setq prelude-flyspell nil)
+
+;; use auto-fill by default
+(defcustom prelude-auto-fill t
+  "Turn on `auto-fill-mode' by default in text files."
+  :type 'boolean
+  :group 'prelude)
+
+(defun prelude-enable-auto-fill ()
+  "Enable `auto-fill-mode' if `prelude-auto-fill' is not nil."
+  (when prelude-auto-fill
+    ;; Set the fill column to 80 instead of 70
+    (setq fill-column 80)
+    (auto-fill-mode +1)))
+
+(add-hook 'text-mode-hook 'prelude-enable-auto-fill)
+
+;; disable key-chord mode
+(key-chord-mode -1)
+
 ;; source: emacs redux
 ;; http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
 (defun rename-file-and-buffer ()
@@ -101,7 +125,19 @@
 (global-set-key (kbd "C-c r") 'rename-file-and-buffer)
 
 
+(defun toggle-frame-split ()
+  "If the frame is split vertically, split it horizontally or vice versa.
+Assumes that the frame is only split into two."
+  (interactive)
+  (unless (= (length (window-list)) 2) (error "Can only toggle a frame split in two"))
+  (let ((split-vertically-p (window-combined-p)))
+    (delete-window) ; closes current window
+    (if split-vertically-p
+        (split-window-horizontally)
+      (split-window-vertically)) ; gives us a split with the other window twice
+    (switch-to-buffer nil))) ; restore the original window in this part of the frame
 
+(global-set-key (kbd "C-x t") 'toggle-frame-split)
 
 ;; default with window-numbers on
 ;; ----------------------------------------------------------------------------
