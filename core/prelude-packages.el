@@ -34,6 +34,7 @@
 ;;; Code:
 (require 'cl)
 (require 'package)
+
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/"))
 (add-to-list 'package-archives
@@ -45,9 +46,9 @@
 (defvar prelude-packages
   '(ace-jump-mode ack-and-a-half anzu dash diminish elisp-slime-nav
     epl expand-region flx-ido flycheck gist
-    git-commit-mode gitconfig-mode gitignore-mode grizzl
-    guru-mode helm helm-projectile ido-ubiquitous
-    key-chord magit move-text rainbow-mode
+    gitconfig-mode gitignore-mode grizzl
+    guru-mode projectile ido-ubiquitous
+    magit move-text rainbow-mode
     smartparens smex undo-tree
     melpa yasnippet
     volatile-highlights zenburn-theme)
@@ -69,7 +70,7 @@
 Missing packages are installed automatically."
   (mapc #'prelude-require-package packages))
 
-(defalias 'prelude-ensure-module-deps 'prelude-require-packages)
+(define-obsolete-function-alias 'prelude-ensure-module-deps 'prelude-require-packages)
 
 (defun prelude-install-packages ()
   "Install all packages listed in `prelude-packages'."

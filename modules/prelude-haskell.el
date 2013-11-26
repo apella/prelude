@@ -33,9 +33,9 @@
 ;;; Code:
 
 (require 'prelude-programming)
-(prelude-ensure-module-deps '(haskell-mode
-                              ghc
-                              ghci-completion))
+(prelude-require-packages '(haskell-mode
+			    ghc
+			    ghci-completion))
 
 (eval-after-load 'haskell-mode
   '(progn

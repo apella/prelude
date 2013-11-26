@@ -32,7 +32,7 @@
 
 ;;; Code:
 
-(prelude-ensure-module-deps '(auctex))
+(prelude-require-packages '(auctex))
 (require 'smartparens-latex)
 
 ;; AUCTeX configuration
@@ -66,7 +66,8 @@
   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-  (abbrev-mode +1))
+  (abbrev-mode +1)
+  (smartparens-mode +1))
 
 (setq prelude-latex-mode-hook 'prelude-latex-mode-defaults)
 
