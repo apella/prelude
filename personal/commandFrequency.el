@@ -1,7 +1,7 @@
 ;;; Setup of 'keyfreq to track command frequency.
 ;;; use keyfreq-show to see how many times you used a command.
 
-(prelude-require-package 'keyfreq)
+(prelude-require-packages '(keyfreq))
 
 (eval-after-load 'keyfreq
   '(progn

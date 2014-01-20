@@ -104,7 +104,7 @@
 (add-hook 'text-mode-hook 'prelude-enable-auto-fill)
 
 ;; disable key-chord mode
-(key-chord-mode -1)
+;; (key-chord-mode -1)
 
 ;; source: emacs redux
 ;; http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
