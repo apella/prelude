@@ -32,14 +32,13 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(prelude-ensure-module-deps '(google-c-style
-                              window-number
+(prelude-ensure-module-deps '(window-number
                               paredit
                               iy-go-to-char
                               ;; command-frequency
                               ))
 ;; show the linenumbers
-;; (global-linum-mode 1)
+(global-linum-mode 1)
 
 ;; quick key for compilation
 (global-set-key [(f5)] 'recompile)
