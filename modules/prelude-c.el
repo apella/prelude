@@ -41,6 +41,7 @@
 
 (setq prelude-c-mode-common-hook 'prelude-c-mode-common-defaults)
 
+
 ;; this will affect all modes derived from cc-mode, like
 ;; java-mode, php-mode, etc
 (add-hook 'c-mode-common-hook (lambda ()
@@ -53,6 +54,33 @@
 
 (add-hook 'makefile-mode-hook (lambda ()
                                 (run-hooks 'prelude-makefile-mode-hook)))
+
+(require 'auto-complete)
+(require 'auto-complete-config)
+(ac-config-default)
+
+(require 'yasnippet)
+(yas-global-mode 1)
+
+(defun apella:ac-c-header-init ()
+  (require 'auto-complete-c-headers)
+  (add-to-list 'ac-sources 'ac-source-c-headers)
+  (add-to-list 'achead:include-directories '"/usr/include/c++/4.8"))
+(add-hook 'c++-mode-hook 'apella:ac-c-header-init)
+(add-hook 'c-mode-hook 'apella:ac-c-header-init)
+
+(require 'google-c-style)
+(add-hook 'c-mode-hook 'google-set-c-style)
+
+;; turn on semantic
+(semantic-mode 1)
+(defun apella:add-semantic-to-autocomplete ()
+  (add-to-list 'ac-sources 'ac-source-semantic))
+(add-hook 'c-mode-common-hook 'apella:add-semantic-to-autocomplete)
+;; turn on ede mode
+
+
+
 (provide 'prelude-c)
 
 ;;; prelude-c.el ends here
