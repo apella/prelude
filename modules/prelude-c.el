@@ -35,9 +35,11 @@
 (require 'prelude-programming)
 
 (defun prelude-c-mode-common-defaults ()
-  (setq indent-tabs-mode t)
+  (setq indent-tabs-mode nil)
   (setq c-basic-offset 2)
-  (c-set-offset 'substatement-open 0))
+  (setq default-tab-width 2)
+  (c-set-offset 'substatement-open 0)
+  (local-set-key (kbd "C-<tab>") 'ff-find-other-file))
 
 (setq prelude-c-mode-common-hook 'prelude-c-mode-common-defaults)
 
@@ -77,9 +79,21 @@
 (defun apella:add-semantic-to-autocomplete ()
   (add-to-list 'ac-sources 'ac-source-semantic))
 (add-hook 'c-mode-common-hook 'apella:add-semantic-to-autocomplete)
-;; turn on ede mode
 
+;; follow a symbol
+(add-hook 'c-mode-common-hook
+          (lambda()
+            (local-set-key (kbd "M-.") 'semantic-ia-fast-jump)))
 
+;; use flymake-google-cpplint-load
+(defun apella:flymake-google-init ()
+  (require 'flymake-google-cpplint)
+  (custom-set-variables
+   '(flymake-google-cpplint-command "$HOME/bin/cpplint"))
+  (flymake-google-cpplint-load))
+
+(add-hook 'c-mode-hook 'apella:flymake-google-init)
+(add-hook 'c++-mode-hook 'apella:flymake-google-init)
 
 (provide 'prelude-c)
 
